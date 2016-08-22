@@ -1,0 +1,57 @@
+<html>
+<head>
+</head>
+<body ng-app="myApp" ng-controller="testCtrl">
+<h1>
+{{helloMessage}}</h1>
+<button ng-click='fetch()'> Clique </button>
+
+<div class="input-group search-bar">
+  <input type="text" 
+         ng-model="search" 
+         placeholder="Enter city name" />
+   <button ng-click='fetch()'> OK </button>
+  
+</div>
+
+{{search}}
+
+<div ng-if="response.Response!=='False'">
+  Related Results:<hr>
+
+  <ul class="rel-results">
+    <li ng-repeat="city in res">
+       {{city}}
+    </li>
+  </ul>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"> </script>
+<script type="text/javascript">
+var myApp = angular.module('myApp',[]);
+
+myApp.controller('testCtrl',function($scope,$http) {
+	$scope.helloMessage="Hello World";
+	$scope.key = "a22ea50f7ac900659eb83725cf4a6d4e";
+	$scope.search = "Rouen";
+	$scope.$watch('search', function() {
+		$scope.fetch();
+	});
+	$scope.url= "http://api.openweathermap.org/data/2.5/weather?q=" + $scope.search + "&APPID=" + $scope.key;
+	$scope.fetch = function(){
+		$scope.url= "http://api.openweathermap.org/data/2.5/weather?q=" + $scope.search + "&APPID=" + $scope.key;
+		if ($scope.search!=null && $scope.search!="") {
+			console.log($scope.search);
+			$http.get($scope.url)
+			.then(function(response){ $scope.res = response.data;
+			$scope.status= response.status;},
+			function errorCallback(response) {
+				alert(response.status);
+			});
+		}
+	}
+});
+</script>
+</body>
+</html>
