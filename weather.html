@@ -26,6 +26,7 @@ Select your language :
 <option value="hr">Croatian</option>
 <option value="ca">Catalan</option>
 </select>
+
 <br>
 Select your units format : 
 <select ng-model="format" >
@@ -33,6 +34,14 @@ Select your units format :
 <option value="imperial">Imperial</option>
 </select>
 <br>
+
+<select ng-model="forecast" >
+<option value="1">One day</option>
+<option value="3">Three days</option>
+<option value="5">Five days</option>
+</select> forecast
+<br>
+
 Format : [city name] OR [city name,country code] OR [latitude;longitude]
   <input type="text" 
          ng-model="search" 
@@ -47,9 +56,16 @@ Format : [city name] OR [city name,country code] OR [latitude;longitude]
 
 <div ng-if="response.Response!=='False'">
   Related Results:<hr>
-
+  <h1>Current weather : </h1>
   <ul class="rel-results">
-    <li ng-repeat="city in res">
+    <li ng-repeat="city in res1">
+       {{city}}
+    </li>
+  </ul>
+  <br><br>
+  <h1>Forecast weather : </h1>
+  <ul class="rel-results">
+    <li ng-repeat="city in res2">
        {{city}}
     </li>
   </ul>
@@ -57,17 +73,18 @@ Format : [city name] OR [city name,country code] OR [latitude;longitude]
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"> </script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-cookies.js">//Antoine </script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-cookies.js"> </script>
 <script type="text/javascript">
 var myApp = angular.module('myApp',['ngCookies']);
 
-myApp.controller('testCtrl',['$scope','$http','$cookies', function($scope,$http,$cookies) {//Antoine
+myApp.controller('testCtrl',['$scope','$http','$cookies', function($scope,$http,$cookies) {
 	$scope.helloMessage="Hello World";
 	$scope.language="en";
 	$scope.format="metric";
+	$scope.forecast="1";
 	$scope.key = "a22ea50f7ac900659eb83725cf4a6d4e";
 	var now = new Date(), exp = new Date(now.getFullYear(), now.getMonth()+1, now.getDate());
-	$scope.search=$cookies.get('Location');//Antoine (je gere le fait qu'il soit vide plus loin)
+	$scope.search=$cookies.get('Location');
 	$scope.$watch('search', function() {
 		$scope.fetch();
 	});
@@ -82,25 +99,35 @@ myApp.controller('testCtrl',['$scope','$http','$cookies', function($scope,$http,
 	
 	$scope.fetch = function(){
 		if ($scope.search!=null && $scope.search!="") 
-		{   $cookies.put('Location',$scope.search,{ expires : exp});//Antoine : ici je donne la valeur de la recherche au cookie avant de faire la requete
-			$scope.url = "http://api.openweathermap.org/data/2.5/weather?";
+		{   $cookies.put('Location',$scope.search,{ expires : exp});
+			$scope.urlCurrent = "http://api.openweathermap.org/data/2.5/weather?";
+			$scope.urlForecast = "http://api.openweathermap.org/data/2.5/forecast?";
 			var firstChar = $scope.search.substring(0, 1);
 			if (isNaN(firstChar)) {
-				$scope.url += "q=" + $scope.search;
+				$scope.urlTemp = "q=" + $scope.search;
 			}
 			else {
-				
 				var num = $scope.search.indexOf(';');
 				$scope.lat = $scope.search.substring(0,num);
 				//The only problem occurring with spaces is when it's placed right after the ;, so to prevent that we delete these ones : 
 				while ($scope.search.charAt(num+1)==" ") {$scope.search = $scope.lat + ";" + $scope.search.substring(num+2);}
 				$scope.lon = $scope.search.substring(num+1);
-				$scope.url += "lat=" + $scope.lat + "&lon=" + $scope.lon;
+				$scope.urlTemp = "lat=" + $scope.lat + "&lon=" + $scope.lon;
 			}
-			$scope.url +=  "&APPID=" + $scope.key + "&lang=" + $scope.language + "&units=" + $scope.format;
-			$http.get($scope.url)
-			.then(function(response){ $scope.res = response.data;
-			$scope.status= response.status;},
+			$scope.urlTemp +=  "&APPID=" + $scope.key + "&lang=" + $scope.language + "&units=" + $scope.format;
+			$scope.urlCurrent += $scope.urlTemp;
+			$scope.urlForecast += $scope.urlTemp;
+			
+			$http.get($scope.urlCurrent)
+			.then(function(response){ $scope.res1 = response.data;
+			$scope.status1= response.status;},
+			function errorCallback(response) {
+				alert(response.status);
+			});
+			
+			$http.get($scope.urlForecast)
+			.then(function(response){ $scope.res2 = response.data;
+			$scope.status2= response.status;},
 			function errorCallback(response) {
 				alert(response.status);
 			});
