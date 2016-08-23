@@ -4,15 +4,15 @@
 <body ng-app="myApp" ng-controller="testCtrl">
 <h1>
 {{helloMessage}}</h1>
-<button ng-click='fetch()'> Clique </button>
 
 <div class="input-group search-bar">
   <input type="text" 
          ng-model="search" 
          placeholder="Enter city name" />
-   <button ng-click='fetch()'> OK </button>
+
   
 </div>
+
 
 {{search}}
 
@@ -28,13 +28,15 @@
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"> </script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-cookies.js">//Antoine </script>
 <script type="text/javascript">
-var myApp = angular.module('myApp',[]);
+var myApp = angular.module('myApp',['ngCookies']);
 
-myApp.controller('testCtrl',function($scope,$http) {
+myApp.controller('testCtrl',['$scope','$http','$cookies', function($scope,$http,$cookies) {//Antoine
 	$scope.helloMessage="Hello World";
 	$scope.key = "a22ea50f7ac900659eb83725cf4a6d4e";
-	$scope.search = "Rouen";
+	var now = new Date(), exp = new Date(now.getFullYear(), now.getMonth()+1, now.getDate());
+	$scope.search=$cookies.get('City');//Antoine (je gere le fait qu'il soit vide plus loin)
 	$scope.$watch('search', function() {
 		$scope.fetch();
 	});
@@ -42,7 +44,7 @@ myApp.controller('testCtrl',function($scope,$http) {
 	$scope.fetch = function(){
 		$scope.url= "http://api.openweathermap.org/data/2.5/weather?q=" + $scope.search + "&APPID=" + $scope.key;
 		if ($scope.search!=null && $scope.search!="") {
-			console.log($scope.search);
+			$cookies.put('City',$scope.search,{ expires : exp});//Antoine : ici je donne la valeur de la recherche au cookie avant de faire la requete
 			$http.get($scope.url)
 			.then(function(response){ $scope.res = response.data;
 			$scope.status= response.status;},
@@ -51,7 +53,7 @@ myApp.controller('testCtrl',function($scope,$http) {
 			});
 		}
 	}
-});
+}]);
 </script>
 </body>
 </html>
