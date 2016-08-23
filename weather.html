@@ -33,14 +33,14 @@ Select your units format :
 <option value="imperial">Imperial</option>
 </select>
 <br>
-<div class="input-group search-bar">
+Format : [city name] OR [city name,country code] OR [latitude;longitude]
   <input type="text" 
          ng-model="search" 
 		 ng-model-options="{debounce : 1000}"
          placeholder="Enter city name" />
 
   
-</div>
+
 
 
 {{search}}
@@ -81,17 +81,29 @@ myApp.controller('testCtrl',['$scope','$http','$cookies', function($scope,$http,
 	});
 	
 	$scope.fetch = function(){
-		$scope.url= "http://api.openweathermap.org/data/2.5/weather?q=" + $scope.search + "&APPID=" + $scope.key + "&lang=" + $scope.language + "&units=" + $scope.format;
 		if ($scope.search!=null && $scope.search!="") 
-			
-			{$cookies.put('Location',$scope.search,{ expires : exp});//Antoine : ici je donne la valeur de la recherche au cookie avant de faire la requete
-				$http.get($scope.url)
-				.then(function(response){ $scope.res = response.data;
-				$scope.status= response.status;},
-				function errorCallback(response) {
-					alert(response.status);
-				});
+		{   $cookies.put('Location',$scope.search,{ expires : exp});//Antoine : ici je donne la valeur de la recherche au cookie avant de faire la requete
+			$scope.url = "http://api.openweathermap.org/data/2.5/weather?";
+			var firstChar = $scope.search.substring(0, 1);
+			if (isNaN(firstChar)) {
+				$scope.url += "q=" + $scope.search;
 			}
+			else {
+				var num = $scope.search.indexOf(';');
+				
+				$scope.lat = $scope.search.substring(0,num);
+				$scope.lon = $scope.search.substring(num+1);
+				$scope.url += "lat=" + $scope.lat + "&lon=" + $scope.lon;
+			}
+			$scope.url +=  "&APPID=" + $scope.key + "&lang=" + $scope.language + "&units=" + $scope.format;
+			$http.get($scope.url)
+			.then(function(response){ $scope.res = response.data;
+			$scope.status= response.status;},
+			function errorCallback(response) {
+				alert(response.status);
+			});
+			
+		}
 	}
 }]);
 </script>
