@@ -5,19 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
 <title>Weather webapp</title>
+<style>
+.table td,
+.table th {
+	text-align: center;
+	vertical-align: middle !important;
+}
+
+.affix {
+    position: fixed;
+    display:block;
+	float : center;
+    margin: auto;
+}
+
+body {
+	background-image:url(background.png);
+	background-repeat:no-repeat;
+	background-attachment:fixed;
+}
+
+.table-striped>tbody>tr:nth-child(even)>td {
+   background-color: #879BD4; // Choose your own color here
+ }
+
+th {
+    background-color: #60D6B9;
+    color: white;
+}
+
+.form-control {
+	color: #787A7A;
+}
+
+.h1 {
+	color: #C99534;
+}
+ 
+</style>
 </head>
 <body ng-app="myApp" ng-controller="testCtrl">
 <div class="container">
-<div class="navbar-header">
-<form class="form-inline">
-Choose the location : 
+
+<form class="form-inline form-horizontal" data-spy="affix" style="z-index: 50">
+
   <input type="text" 
          ng-model="search" 
 		 ng-model-options="{debounce : 1000}"
-         placeholder="Location" />
-<i>Format : [city name] OR [city name,country code] OR [latitude;longitude]</i>
+         placeholder="Location"
+		 data-toggle="tooltip" 
+		 title="Format : [city name] OR [city name,country code] OR [latitude;longitude]"  
+		 name="search"
+		 class="form-control input"/>
+
   
-<select ng-model="language" >
+<select ng-model="language" class="form-control select">
 <option value="en">English</option>
 <option value="ru">Russian</option>
 <option value="it">Italian</option>
@@ -38,37 +80,45 @@ Choose the location :
 <option value="ca">Catalan</option>
 </select>
 
-<select ng-model="format" >
+<select ng-model="format" class="form-control select">
 <option value="metric">Metric</option>
 <option value="imperial">Imperial</option>
 </select>
 
 
-<select ng-model="forecast" >
+<select ng-model="forecast" class="form-control select">
 <option value="1">One day</option>
 <option value="3">Three days</option>
 <option value="5">Five days</option>
-</select> forecast
+</select> 
 
 
 
 </form>
-</div>
 
 
-<hr>
-<div ng-if="response.Response!=='False'">
-<center><h1>{{res1.data.name}}, {{res1.data.sys.country}} ({{res1.data.coord.lat}}/{{res1.data.coord.lon}})</h1></center>
-<table class="table-bordered">
+<br><br>
+
+<div ng-if="search!=null && search!='' && search!='undefined'">
+<center><p class="h1">{{res1.data.name}}, {{res1.data.sys.country}} ({{res1.data.coord.lat}}/{{res1.data.coord.lon}})</p><center><br><br>
+<table class="table table-bordered table-striped" >
 	<thead>
 		<tr>
-			<th>Date and time (UTC)</th>
-			<th>Weather</th>
-			<th>Temp(°C or °F), min, max</th>
-			<th>Humidity(%)</th>
-			<th>Pressure(sea/ground level)(hPa)</th>
-			<th>Wind(speed,direction)(m/s or mph,degrees)</th>
-			<th>Clouds(%)</th>
+			<th>Date and time 
+			<span id="dateInfo" class="glyphicon glyphicon-info-sign" aria-hidden="true" title="UTC" style="float:right"></span> 
+			</th>
+			<th>Weather </th>
+			<th>Temp | min | max 
+			<span id="tempInfo" class="glyphicon glyphicon-info-sign" aria-hidden="true" title="°C or °F" style="float:right"></span>
+			</th>
+			<th>Humidity</th>
+			<th>Pressure
+			<span id="pressureInfo" class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Sea level/ground level in hPa" style="float:right"></span>
+			</th>
+			<th>Wind 
+			<span id="windInfo" class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Speed (m/s or mph), direction (degrees)" style="float:right"></span>
+			</th>
+			<th>Clouds</th>
 		</tr>
 	</thead>
 
@@ -76,20 +126,20 @@ Choose the location :
 		<tr>
 			<td>Now</td>
 			<td> <img src='icons/{{res1.data.weather[0].icon}}.png'>{{res1.data.weather[0].description}} </td>
-			<td>{{res1.data.main.temp}}, {{res1.data.main.temp_min}}, {{res1.data.main.temp_max}}</td>
-			<td>{{res1.data.main.humidity}}</td>
-			<td>{{res1.data.main.pressure}}/{{res1.data.main.grnd_level}}</td>
-			<td>{{res1.data.wind.speed}},{{res1.data.wind.deg}}</td>
-			<td>{{res1.data.clouds.all}}</td>
+			<td>{{res1.data.main.temp}} | {{res1.data.main.temp_min}} | {{res1.data.main.temp_max}}</td>
+			<td>{{res1.data.main.humidity}}%</td>
+			<td>{{res1.data.main.pressure}} | {{res1.data.main.grnd_level}}</td>
+			<td>{{res1.data.wind.speed}} | {{res1.data.wind.deg}}</td>
+			<td>{{res1.data.clouds.all}}%</td>
 		</tr>
 		<tr ng-repeat="n in arrayGen">
 			<td>{{res2.data.list[n].dt_txt}}</td>
 			<td> <img src='icons/{{res2.data.list[n].weather[0].icon}}.png'>{{res2.data.list[n].weather[0].description}} </td>
-			<td>{{res2.data.list[n].main.temp}}, {{res2.data.list[n].main.temp_min}}, {{res2.data.list[n].main.temp_max}}</td>
-			<td>{{res2.data.list[n].main.humidity}}</td>
-			<td>{{res2.data.list[n].main.pressure}}/{{res2.data.list[n].main.grnd_level}}</td>
-			<td>{{res2.data.list[n].wind.speed}},{{res2.data.list[n].wind.deg}}</td>
-			<td>{{res2.data.list[n].clouds.all}}</td>
+			<td>{{res2.data.list[n].main.temp}} | {{res2.data.list[n].main.temp_min}} | {{res2.data.list[n].main.temp_max}}</td>
+			<td>{{res2.data.list[n].main.humidity}}%</td>
+			<td>{{res2.data.list[n].main.pressure}} | {{res2.data.list[n].main.grnd_level}}</td>
+			<td>{{res2.data.list[n].wind.speed}} | {{res2.data.list[n].wind.deg}}</td>
+			<td>{{res2.data.list[n].clouds.all}}%</td>
 		</tr>
 	</tbody>
 </table>
@@ -113,9 +163,43 @@ myApp.controller('testCtrl',['$scope','$http','$cookies', function($scope,$http,
 	$scope.key = "a22ea50f7ac900659eb83725cf4a6d4e";
 	var now = new Date(), exp = new Date(now.getFullYear(), now.getMonth()+1, now.getDate());
 	$scope.search=$cookies.get('Location');
+	
+	$('input[name=search]').tooltip({
+    placement: "bottom",
+    trigger: "hover",
+    });
+	
+	$('span[id=dateInfo]').tooltip({
+    placement: "top",
+    trigger: "click",
+    });
+	
+	$('span[id=weatherInfo]').tooltip({
+    placement: "top",
+    trigger: "click",
+    });
+	
+	$('span[id=tempInfo]').tooltip({
+    placement: "top",
+    trigger: "click",
+    });
+	
+	$('span[id=pressureInfo]').tooltip({
+    placement: "top",
+    trigger: "click",
+    });
+	
+	$('span[id=windInfo]').tooltip({
+    placement: "top",
+    trigger: "click",
+    });
+	
+
+	
 	$scope.$watch('search', function() {
 		$scope.fetch();
 	});
+	
 	
 	$scope.$watch('language', function() {
 		$scope.fetch();
