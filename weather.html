@@ -1,11 +1,22 @@
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+<title>Weather webapp</title>
 </head>
 <body ng-app="myApp" ng-controller="testCtrl">
-<h1>
-{{helloMessage}}</h1>
-
-Select your language : 
+<div class="container">
+<div class="navbar-header">
+<form class="form-inline">
+Choose the location : 
+  <input type="text" 
+         ng-model="search" 
+		 ng-model-options="{debounce : 1000}"
+         placeholder="Location" />
+<i>Format : [city name] OR [city name,country code] OR [latitude;longitude]</i>
+  
 <select ng-model="language" >
 <option value="en">English</option>
 <option value="ru">Russian</option>
@@ -27,51 +38,68 @@ Select your language :
 <option value="ca">Catalan</option>
 </select>
 
-<br>
-Select your units format : 
 <select ng-model="format" >
 <option value="metric">Metric</option>
 <option value="imperial">Imperial</option>
 </select>
-<br>
+
 
 <select ng-model="forecast" >
 <option value="1">One day</option>
 <option value="3">Three days</option>
 <option value="5">Five days</option>
 </select> forecast
-<br>
-
-Format : [city name] OR [city name,country code] OR [latitude;longitude]
-  <input type="text" 
-         ng-model="search" 
-		 ng-model-options="{debounce : 1000}"
-         placeholder="Enter city name" />
-
-  
 
 
 
-{{search}}
-
-<div ng-if="response.Response!=='False'">
-  Related Results:<hr>
-  <h1>Current weather : </h1>
-  <ul class="rel-results">
-    <li ng-repeat="city in res1">
-       {{city}}
-    </li>
-  </ul>
-  <br><br>
-  <h1>Forecast weather : </h1>
-  <ul class="rel-results">
-    <li ng-repeat="city in res2">
-       {{city}}
-    </li>
-  </ul>
+</form>
 </div>
 
 
+<hr>
+<div ng-if="response.Response!=='False'">
+<center><h1>{{res1.data.name}}, {{res1.data.sys.country}} ({{res1.data.coord.lat}}/{{res1.data.coord.lon}})</h1></center>
+<table class="table-bordered">
+	<thead>
+		<tr>
+			<th>Date and time (UTC)</th>
+			<th>Weather</th>
+			<th>Temp(°C or °F), min, max</th>
+			<th>Humidity(%)</th>
+			<th>Pressure(sea/ground level)(hPa)</th>
+			<th>Wind(speed,direction)(m/s or mph,degrees)</th>
+			<th>Clouds(%)</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td>Now</td>
+			<td> <img src='icons/{{res1.data.weather[0].icon}}.png'>{{res1.data.weather[0].description}} </td>
+			<td>{{res1.data.main.temp}}, {{res1.data.main.temp_min}}, {{res1.data.main.temp_max}}</td>
+			<td>{{res1.data.main.humidity}}</td>
+			<td>{{res1.data.main.pressure}}/{{res1.data.main.grnd_level}}</td>
+			<td>{{res1.data.wind.speed}},{{res1.data.wind.deg}}</td>
+			<td>{{res1.data.clouds.all}}</td>
+		</tr>
+		<tr ng-repeat="n in arrayGen">
+			<td>{{res2.data.list[n].dt_txt}}</td>
+			<td> <img src='icons/{{res2.data.list[n].weather[0].icon}}.png'>{{res2.data.list[n].weather[0].description}} </td>
+			<td>{{res2.data.list[n].main.temp}}, {{res2.data.list[n].main.temp_min}}, {{res2.data.list[n].main.temp_max}}</td>
+			<td>{{res2.data.list[n].main.humidity}}</td>
+			<td>{{res2.data.list[n].main.pressure}}/{{res2.data.list[n].main.grnd_level}}</td>
+			<td>{{res2.data.list[n].wind.speed}},{{res2.data.list[n].wind.deg}}</td>
+			<td>{{res2.data.list[n].clouds.all}}</td>
+		</tr>
+	</tbody>
+</table>
+
+
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"> </script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-cookies.js"> </script>
 <script type="text/javascript">
@@ -97,6 +125,10 @@ myApp.controller('testCtrl',['$scope','$http','$cookies', function($scope,$http,
 		$scope.fetch();
 	});
 	
+	$scope.$watch('forecast', function() {
+		$scope.fetch();
+	});
+	
 	$scope.fetch = function(){
 		if ($scope.search!=null && $scope.search!="") 
 		{   $cookies.put('Location',$scope.search,{ expires : exp});
@@ -119,18 +151,23 @@ myApp.controller('testCtrl',['$scope','$http','$cookies', function($scope,$http,
 			$scope.urlForecast += $scope.urlTemp;
 			
 			$http.get($scope.urlCurrent)
-			.then(function(response){ $scope.res1 = response.data;
+			.then(function(response){ $scope.res1 = response;
 			$scope.status1= response.status;},
 			function errorCallback(response) {
 				alert(response.status);
 			});
 			
 			$http.get($scope.urlForecast)
-			.then(function(response){ $scope.res2 = response.data;
+			.then(function(response){ $scope.res2 = response;
 			$scope.status2= response.status;},
 			function errorCallback(response) {
 				alert(response.status);
 			});
+			
+			$scope.limit=Number($scope.forecast);
+			$scope.arrayGen=[];
+			for (i=0;i<8*$scope.limit;i++)
+				$scope.arrayGen.push(i);
 			
 		}
 	}
