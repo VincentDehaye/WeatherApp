@@ -14,49 +14,50 @@
 	sPh4tn/x1+QkGpXr5HOoabRKYnNe2ozdtobZnY3Q8B15509wTECVS/C5LBnZapgtic3ZRhW7HcJo
 	udrmqycntZZRR71w2PlAtuppG2ZLYnO2UUkhwaO/enAzXzuFoJ6CZgJXsCMC2zzMXk3AYe8TIgXJ
 	bXO0+Hjao/shwACPQNjLF0UqSgAAAABJRU5ErkJggg==" rel="icon" type="image/x-icon" />
-	<!-- Only way to add my favicon, don't know why, but I wanted it ! !-->
+	<!-- Only way to add my favicon was to convert it to base64 string, don't know why, but I wanted it ! !-->
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
 	<title>Weather webapp</title>
-	<style> <!-- Additional CSS adjustments !-->
-.table td,
-.table th {
-	text-align: center;
-	vertical-align: middle !important;
-}
+	<!-- Additional CSS adjustments !-->
+	<style> 
+		.table td,
+		.table th {
+			text-align: center;
+			vertical-align: middle !important;
+		}
 
-.affix { <!-- To get a sticky form to the top of the window!-->
-    position: fixed;
-    display:block;
-	float : center;
-    margin: auto;
-}
+		.affix { <!-- To get a sticky form to the top of the window!-->
+			position: fixed;
+			display:block;
+			float : center;
+			margin: auto;
+		}
 
-body {
-	background-image:url(background.png);
-	background-repeat:no-repeat;
-	background-attachment:fixed;
-}
+		body {
+			background-image:url(background.png);
+			background-repeat:no-repeat;
+			background-attachment:fixed;
+		}
 
-.table-striped>tbody>tr:nth-child(even)>td {
-   background-color: #879BD4; // Choose your own color here
- }
+		.table-striped>tbody>tr:nth-child(even)>td {
+		   background-color: #879BD4; 
+		 }
 
-th {
-    background-color: #60D6B9;
-    color: white;
-}
+		th {
+			background-color: #60D6B9;
+			color: white;
+		}
 
-.form-control {
-	color: #787A7A;
-}
+		.form-control {
+			color: #787A7A;
+		}
 
-.h1 {
-	color: #C99534;
-}
- 
-</style>
+		.h1 {
+			color: #C99534;
+		}
+		 
+	</style>
 </head>
 <body ng-app="myApp" ng-controller="weatherCtrl">
 	<div class="container">
