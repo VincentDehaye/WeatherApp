@@ -58,9 +58,9 @@ th {
  
 </style>
 </head>
-<body ng-app="myApp" ng-controller="testCtrl">
+<body ng-app="myApp" ng-controller="weatherCtrl">
 	<div class="container">
-
+	
 		<form class="form-inline form-horizontal" data-spy="affix" style="z-index: 50"> 
 		<!-- z-index increased to hide the info signs when scrolling !-->
 
@@ -71,70 +71,70 @@ th {
 			 data-toggle="tooltip" 
 			 title="Format : [city name] OR [city name,country code] OR [latitude;longitude]"  
 			 name="search"
-			 class="form-control input"/>
+			 class="form-control input"/> <!-- debounce of 1s to let user type in peace, and not flood APi with requests !-->
 
   
-			<select ng-model="language" class="form-control select">
-<option value="en">English</option>
-<option value="ru">Russian</option>
-<option value="it">Italian</option>
-<option value="uk">Ukrainian</option>
-<option value="de">German</option>
-<option value="pt">Portuguese</option>
-<option value="ro">Romanian</option>
-<option value="pl">Polish</option>
-<option value="fi">Finnish</option>
-<option value="nl">Dutch</option>
-<option value="fr">French</option>
-<option value="bg">Bulgarian</option>
-<option value="sv">Swedish</option>
-<option value="zh_tw">Chinese Traditional</option>
-<option value="zh">Chinese Simplified</option>
-<option value="tr">Turkish</option>
-<option value="hr">Croatian</option>
-<option value="ca">Catalan</option>
-</select>
+			<select ng-model="language" class="form-control select"><!-- list of languages supported by the API !-->
+				<option value="en">English</option>
+				<option value="ru">Russian</option>
+				<option value="it">Italian</option>
+				<option value="uk">Ukrainian</option>
+				<option value="de">German</option>
+				<option value="pt">Portuguese</option>
+				<option value="ro">Romanian</option>
+				<option value="pl">Polish</option>
+				<option value="fi">Finnish</option>
+				<option value="nl">Dutch</option>
+				<option value="fr">French</option>
+				<option value="bg">Bulgarian</option>
+				<option value="sv">Swedish</option>
+				<option value="zh_tw">Chinese Traditional</option>
+				<option value="zh">Chinese Simplified</option>
+				<option value="tr">Turkish</option>
+				<option value="hr">Croatian</option>
+				<option value="ca">Catalan</option>
+			</select>
 
 			<select ng-model="format" class="form-control select">
-<option value="metric">Metric</option>
-<option value="imperial">Imperial</option>
-</select>
-
+				<option value="metric">Metric</option>
+				<option value="imperial">Imperial</option>
+			</select>
 
 			<select ng-model="forecast" class="form-control select">
-<option value="1">One day</option>
-<option value="3">Three days</option>
-<option value="5">Five days</option>
-</select> 
+				<option value="1">One day</option>
+				<option value="3">Three days</option>
+				<option value="5">Five days</option>
+			</select> 
 		</form>
 
 		<br><br>
 
-		<div ng-if="search!=null && search!='' && search!='undefined'">
+		<div ng-if="search!=null && search!='' && search!='undefined'"> <!-- to prevent from showing void tables or errors !-->
 			<center><p class="h1">{{res1.data.name}}, {{res1.data.sys.country}} <br>({{res1.data.coord.lat}}/{{res1.data.coord.lon}})</p><center><br><br>
 			<table class="table table-bordered table-striped" >
 				<thead>
 					<tr>
 						<th>Date and time 
-						<span id="dateInfo" class="glyphicon glyphicon-info-sign" aria-hidden="true" title="UTC" style="float:right"></span> 
+						<span id="dateInfo" class="glyphicon glyphicon-info-sign" style="float:right" title="UTC" style="float:right"></span>
+						<!-- use of tooltips linked to info-signs to avoid displaying too much information and getting too wide columns !-->
 						</th>
 						<th>Weather </th>
 						<th>Temp | min | max 
-						<span id="tempInfo" class="glyphicon glyphicon-info-sign" aria-hidden="true" title="°C or °F" style="float:right"></span>
+						<span id="tempInfo" class="glyphicon glyphicon-info-sign" style="float:right" title="°C or °F" style="float:right"></span>
 						</th>
 						<th>Humidity</th>
 						<th>Pressure
-						<span id="pressureInfo" class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Sea level/ground level in hPa" style="float:right"></span>
+						<span id="pressureInfo" class="glyphicon glyphicon-info-sign" style="float:right" title="Sea level/ground level in hPa" style="float:right"></span>
 						</th>
 						<th>Wind 
-						<span id="windInfo" class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Speed (m/s or mph), direction (degrees)" style="float:right"></span>
+						<span id="windInfo" class="glyphicon glyphicon-info-sign" style="float:right" title="Speed (m/s or mph), direction (degrees)" style="float:right"></span>
 						</th>
 						<th>Clouds</th>
 					</tr>
 				</thead>
 
 				<tbody>
-					<tr>
+					<tr> <!-- first row = display of current weather (first API request)!-->
 						<td>Now</td>
 						<td> <img src='icons/{{res1.data.weather[0].icon}}.png'>{{res1.data.weather[0].description}} </td>
 						<td>{{res1.data.main.temp}} | {{res1.data.main.temp_min}} | {{res1.data.main.temp_max}}</td>
@@ -143,7 +143,8 @@ th {
 						<td>{{res1.data.wind.speed}} | {{res1.data.wind.deg}}</td>
 						<td>{{res1.data.clouds.all}}%</td>
 					</tr>
-					<tr ng-repeat="n in arrayGen">
+					<tr ng-repeat="n in arrayGen"> <!-- following rows = display of forecast weather (second API request)
+						use of arrayGen to show the number of lines required by user (1,3 or 5 days)!-->
 						<td>{{res2.data.list[n].dt_txt}}</td>
 						<td> <img src='icons/{{res2.data.list[n].weather[0].icon}}.png'>{{res2.data.list[n].weather[0].description}} </td>
 						<td>{{res2.data.list[n].main.temp}} | {{res2.data.list[n].main.temp_min}} | {{res2.data.list[n].main.temp_max}}</td>
@@ -156,6 +157,7 @@ th {
 			</table>
 		</div>
 		<div ng-if="search==null || search=='' || search=='undefined'" style="vertical-align:middle">
+		<!-- Message displayed when there's no results to display !-->
 			<center><p class="h1">Welcome to your weather webapp.<br> Please provide the location you want to look for.</p><center>
 		</div>
 	</div>
@@ -167,13 +169,12 @@ th {
 	<script type="text/javascript">
 		var myApp = angular.module('myApp',['ngCookies']);
 
-		myApp.controller('testCtrl',['$scope','$http','$cookies', function($scope,$http,$cookies) {
-			$scope.helloMessage="Hello World";
+		myApp.controller('weatherCtrl',['$scope','$http','$cookies', function($scope,$http,$cookies) {
 			$scope.language="en";
 			$scope.format="metric";
 			$scope.forecast="1";
-			$scope.key = "a22ea50f7ac900659eb83725cf4a6d4e";
-			var now = new Date(), exp = new Date(now.getFullYear(), now.getMonth()+1, now.getDate());
+			$scope.key = "a22ea50f7ac900659eb83725cf4a6d4e";//API key, no danger to show
+			var now = new Date(), exp = new Date(now.getFullYear(), now.getMonth()+1, now.getDate());//setting cookie duration to one month
 			$scope.search=$cookies.get('Location');
 			
 			$('input[name=search]').tooltip({
@@ -207,11 +208,10 @@ th {
 			});
 			
 
-	
+	        //One watch per parameter to refresh the results immediately
 			$scope.$watch('search', function() {
 				$scope.fetch();
 			});
-			
 			
 			$scope.$watch('language', function() {
 				$scope.fetch();
@@ -226,12 +226,13 @@ th {
 			});
 			
 			$scope.fetch = function(){
-				if ($scope.search!=null && $scope.search!="") 
+				if ($scope.search!=null && $scope.search!="") //No need to ask the API with that, error returned
 				{   $cookies.put('Location',$scope.search,{ expires : exp});
-					$scope.urlCurrent = "http://api.openweathermap.org/data/2.5/weather?";
-					$scope.urlForecast = "http://api.openweathermap.org/data/2.5/forecast?";
+					$scope.urlCurrent = "http://api.openweathermap.org/data/2.5/weather?";//URL for the first request, current weather API
+					$scope.urlForecast = "http://api.openweathermap.org/data/2.5/forecast?";//URL for the second request, forecast weather API
+					//Now building the rest of the API for both requests, common part
 					var firstChar = $scope.search.substring(0, 1);
-					if (isNaN(firstChar)) {
+					if (isNaN(firstChar)) {//Determines if user puts coordinates or city name
 						$scope.urlTemp = "q=" + $scope.search;
 					}
 					else {
@@ -247,22 +248,21 @@ th {
 					$scope.urlForecast += $scope.urlTemp;
 					
 					$http.get($scope.urlCurrent)
-					.then(function(response){ $scope.res1 = response;
-					$scope.status1= response.status;},
+					.then(function(response){$scope.res1 = response;},
 					function errorCallback(response) {
-						alert(response.status);
+						console.log(response.status);
 					});
 					
 					$http.get($scope.urlForecast)
-					.then(function(response){ $scope.res2 = response;
-					$scope.status2= response.status;},
+					.then(function(response){ $scope.res2 = response;},
 					function errorCallback(response) {
-						alert(response.status);
+						console.log(response.status);
 					});
 					
-					$scope.limit=Number($scope.forecast);
-					$scope.arrayGen=[];
-					for (i=0;i<8*$scope.limit;i++)
+					$scope.limit=Number($scope.forecast);//Convert the char to number
+					$scope.arrayGen=[];//Used to know how much to display from the JSON, depending on user's choice
+					for (i=0;i<8*$scope.limit;i++)//Results from the API are three hour slices, one day = 8*3 hours,
+					//so 8 lines to display per forecast day chosen by the user
 						$scope.arrayGen.push(i);
 					
 				}
