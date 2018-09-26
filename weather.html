@@ -111,12 +111,12 @@
 		<br><br>
 
 		<div ng-if="search!=null && search!='' && search!='undefined'"> <!-- to prevent from showing void tables or errors !-->
-			<center><p class="h1">{{res1.data.name}}, {{res1.data.sys.country}} <br>({{res1.data.coord.lat}}/{{res1.data.coord.lon}})</p><center><br><br>
+			<center><p class="h1">{{res1.data.name}}, {{res1.data.sys.country}} <br>[{{res1.data.coord.lat}}, {{res1.data.coord.lon}}]</p><center><br><br>
 			<table class="table table-bordered table-striped" >
 				<thead>
 					<tr>
 						<th>Date and time 
-						<span id="dateInfo" class="glyphicon glyphicon-info-sign" style="float:right" title="UTC" style="float:right"></span>
+						<span id="dateInfo" class="glyphicon glyphicon-info-sign" style="float:right" title="Your local time" style="float:right"></span>
 						<!-- use of tooltips linked to info-signs to avoid displaying too much information and getting too wide columns !-->
 						</th>
 						<th>Weather </th>
@@ -176,6 +176,7 @@
 			$scope.forecast="1";
 			$scope.key = "a22ea50f7ac900659eb83725cf4a6d4e";//API key, no danger to show
 			var now = new Date(), exp = new Date(now.getFullYear(), now.getMonth()+1, now.getDate());//setting cookie duration to one month
+			const timeZoneOffset = new Date().getTimezoneOffset();
 			$scope.search=$cookies.get('Location');
 			
 			$('input[name=search]').tooltip({
@@ -248,14 +249,42 @@
 					$scope.urlCurrent += $scope.urlTemp;
 					$scope.urlForecast += $scope.urlTemp;
 					
+					function formatDate(date) {
+						var d = new Date(date),
+							month = '' + (d.getMonth() + 1),
+							day = '' + d.getDate(),
+							year = d.getFullYear();
+							hours = '' + d.getHours(),
+							minutes = '' + d.getMinutes(),
+							seconds = '' + d.getSeconds()
+
+						if (month.length < 2) month = '0' + month;
+						if (day.length < 2) day = '0' + day;
+						if (hours.length < 2) hours = '0' + hours;
+						if (minutes.length < 2) minutes = '0' + minutes;
+						if (seconds.length < 2) seconds = '0' + seconds;
+
+						return [year, month, day].join('-') +' '+ [hours, minutes, seconds].join(':');
+					}
+					
 					$http.get($scope.urlCurrent)
-					.then(function(response){$scope.res1 = response;},
+					.then(function(response){
+					$scope.res1 = response;
+					},
 					function errorCallback(response) {
 						console.log(response.status);
 					});
 					
 					$http.get($scope.urlForecast)
-					.then(function(response){ $scope.res2 = response;},
+					.then(function(response){ 
+					response.data.list.forEach(function(element) {
+						// Offset provided in minutes: *60
+						// Timestamp expected in milliseconds: *1000
+						dateWithOffset = new Date((element.dt + timeZoneOffset * 60) * 1000); 
+						element.dt_txt = formatDate(dateWithOffset);
+					});
+					$scope.res2 = response;
+					},
 					function errorCallback(response) {
 						console.log(response.status);
 					});
