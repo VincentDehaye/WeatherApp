@@ -280,7 +280,7 @@
 					response.data.list.forEach(function(element) {
 						// Offset provided in minutes: *60
 						// Timestamp expected in milliseconds: *1000
-						dateWithOffset = new Date((element.dt + timeZoneOffset * 60) * 1000); 
+						dateWithOffset = new Date((element.dt - timeZoneOffset * 60) * 1000); 
 						element.dt_txt = formatDate(dateWithOffset);
 					});
 					$scope.res2 = response;
